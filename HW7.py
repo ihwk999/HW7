@@ -192,11 +192,8 @@ def make_seasons_table(data, cur, conn):
     conn.commit()
 
 def winners_since_search(year, cur, conn):
-    print('hi','\n\n\n')
     cur.execute("SELECT name FROM Winners WHERE id IN (SELECT winner_id FROM Seasons WHERE end_year >= ?)", (year,))
     winners = cur.fetchall()
-    print('\n\n\n')
-    print(winners)
     results = {}
     for winner in winners:
         winner_name = winner[0]
@@ -272,7 +269,8 @@ class TestAllMethods(unittest.TestCase):
         pass
 
     def test_winners_since_search(self):
-        winners_since_search(1940, self.cur, self.conn)
+        self.assertAlmostEqual(winners_since_search(2020, self.cur2, self.conn2), {'Liverpool FC': 1, 'Manchester City FC': 1})
+        self.assertAlmostEqual(len(winners_since_search(2021, self.cur2, self.conn2)),1)
         pass
 
 
