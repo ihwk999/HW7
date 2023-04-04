@@ -167,7 +167,19 @@ def position_birth_search(position, age, cur, conn):
 #     the passed year. 
 
 def make_winners_table(data, cur, conn):
-    pass
+    cur.execute('''CREATE TABLE IF NOT EXISTS Winners
+    (id INTEGER PRIMARY KEY,
+    name TEXT)''')
+    print(type(data))
+    for d in data:
+        print(data[d],'\n\n\n')
+        driver_id = data[d]['id']
+        driver_name = data[d]['name']
+        cur.execute("INSERT INTO Winners (id, name) VALUES (?,?)",(driver_id, driver_name))
+
+    conn.commit()
+
+
 
 def make_seasons_table(data, cur, conn):
     pass
