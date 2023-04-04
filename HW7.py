@@ -170,22 +170,41 @@ def make_winners_table(data, cur, conn):
     cur.execute('''CREATE TABLE IF NOT EXISTS Winners
     (id INTEGER PRIMARY KEY,
     name TEXT)''')
-    print(type(data))
-    for d in data:
-        print(data[d],'\n\n\n')
-        driver_id = data[d]['id']
-        driver_name = data[d]['name']
-        cur.execute("INSERT INTO Winners (id, name) VALUES (?,?)",(driver_id, driver_name))
-
+    for season in data['seasons']:
+        if season['winner'] != None:
+            name = season['winner']['name']
+            id = season['winner']['id']
+            cur.execute("REPLACE INTO Winners (id, name) VALUES (?,?)",(id, name))
     conn.commit()
 
-
-
 def make_seasons_table(data, cur, conn):
-    pass
+    cur.execute('''CREATE TABLE IF NOT EXISTS Seasons
+    (id INTEGER PRIMARY KEY,
+    winner_id TEXT,
+    end_year INTEGER)''')
+    for season in data['seasons']:
+        if season['winner'] != None:
+            winner_name = season['winner']['name']
+            end_year = int(season['endDate'][0:4])
+            cur.execute("SELECT id FROM Winners WHERE name = ?", (winner_name,))
+            winner_id = cur.fetchone()[0]
+            cur.execute("REPLACE INTO Seasons (id, winner_id, end_year) VALUES (?,?,?)", (season['id'], winner_id, end_year))
+    conn.commit()
 
 def winners_since_search(year, cur, conn):
-    pass
+    print('hi','\n\n\n')
+    cur.execute("SELECT name FROM Winners WHERE id IN (SELECT winner_id FROM Seasons WHERE end_year >= ?)", (year,))
+    winners = cur.fetchall()
+    print('\n\n\n')
+    print(winners)
+    results = {}
+    for winner in winners:
+        winner_name = winner[0]
+        if winner_name in results:
+            results[winner_name] += 1
+        else:
+            results[winner_name] = 1
+    return results
 
 
 class TestAllMethods(unittest.TestCase):
@@ -253,7 +272,7 @@ class TestAllMethods(unittest.TestCase):
         pass
 
     def test_winners_since_search(self):
-
+        winners_since_search(1940, self.cur, self.conn)
         pass
 
 
